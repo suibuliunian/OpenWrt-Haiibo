@@ -1,19 +1,18 @@
-name: ARMv8 Docker BuildX
+name: ARMv8 Docker OpenWrt
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: 0 0 * * 6
+  # schedule:
+  #   - cron: 0 23 * * 5
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_FILE: configs/armv8-docker-mini.config
-  DIY_SCRIPT: diy-mini.sh
+  CONFIG_FILE: configs/armv8-docker.config
+  DIY_SCRIPT: diy-script.sh
   CLASH_KERNEL: arm64
   DOCKER_BUILD: buildImageX.sh
   DOCKER_IMAGE: summary/openwrt-aarch64
-  TAG: mini
   TZ: Asia/Shanghai
 
 jobs:
@@ -57,6 +56,8 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
+        version=$(cat "package/lean/default-settings/files/zzz-default-settings" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')
+        echo "TAG=$version" >> $GITHUB_ENV
 
     - name: Install Feeds
       run: |
@@ -125,3 +126,4 @@ jobs:
         push: true
         tags: |
           ${{ env.DOCKER_IMAGE }}:${{ env.TAG }}
+          ${{ env.DOCKER_IMAGE }}
